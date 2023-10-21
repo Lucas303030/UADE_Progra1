@@ -1,0 +1,4 @@
+ID_cliente	Nombre_cliente	Apellido_cliente	DNI_cliente
+
+52          	Lucas           	Juan              	478789
+57          	Pedro           	Angelo            	2343
