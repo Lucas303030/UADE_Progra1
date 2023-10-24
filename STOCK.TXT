@@ -1,0 +1,2 @@
+ID_producto	Nombre_producto	Descripcion_producto	Clase_producto	Marca_producto	Precio_producto	Stock_producto
+78          	POLLO           	PECHUGA           	CARNES          	LA GRANJA       	500         	10
