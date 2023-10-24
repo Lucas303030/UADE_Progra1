@@ -1,5 +1,7 @@
 import random
 
+#ARCHIVOS DE TXT GUARDADOS EN Downloads
+
 # FUNCIONES:
 # 1) Función para agregar clientes al archivo "CLIENTES.TXT":
 def clientes(archivo="CLIENTES.TXT"):
@@ -73,7 +75,31 @@ def proveedores(archivo="PROVEEDORES.TXT"):
         print("ERROR AL GUARDAR EL REGISTRO:", error)
 
 
-
+#3)Función para validar el número de CUIT:
+        def validar_CUIT():
+            while True:
+                CUIT = input("Ingrese CUIT de cliente (Enter para omitir): ")
+                if CUIT.strip() == "":
+                    return None
+                elif CUIT.isnumeric() and len(CUIT) == 11:
+                    return CUIT
+                else:
+                    print("CUIT inválido. Debe contener exactamente 8 dígitos numéricos.")
+            
+#4)Función para validar el número de celular:
+                    def validar_celular():
+                        while True:
+                            celular=input("Ingrese celular del cliente (Enter para omitir):")
+                            if celular.strip()=="":
+                                return None
+                            elif:
+                                celular.isnumeric() and len(celular)==15:
+                                    return celular
+                            else:
+                                print("Celular inválido. Debe contener exactamente 15 dígitos numéricos.")
+                                
+            
+            
 
 # Llamada a la función
 clientes()
