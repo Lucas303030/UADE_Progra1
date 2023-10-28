@@ -3,6 +3,45 @@ import random
 from tabulate import tabulate
 import datetime
 
+def venta():
+    listar_clientes()
+    id_cliente = str(input("Ingrese cliente: "))
+    try:
+        with open("clientes.txt", "r") as archivo:
+            for line in archivo:
+                lista_campos = line.split(",")
+                if lista_campos[0] == id_cliente:
+                    # print(lista_campos[1], lista_campos[2], lista_campos[4])
+                    pass
+    except FileNotFoundError:
+        pass
+    venta2()
+
+def mostrar_productos_filtrados(categoria):
+    def filtro(categoria, linea):
+        return categoria in linea
+
+    tabla = []
+    try:
+        with open("productos.txt", "r", encoding="UTF-8") as archivo:
+            filtradas = filter(lambda linea: filtro(categoria, linea), archivo)
+            for linea in filtradas:
+                productos = linea.split(",")
+                tabla.append(productos)
+
+        print(tabulate(tabla))
+
+    except FileNotFoundError as error:
+        print(error)
+
+def venta2():
+    categorias, _ = listar_productos()
+    
+    for i in categorias:
+        print(i)
+    categoria = input("Ingrese el nombre de la categoria: ").upper()
+    mostrar_productos_filtrados(categoria)
+    
 def validar_CUIT():
     while True:
         CUIT = input("Ingrese CUIT de cliente (Enter para omitir): ")
@@ -190,12 +229,14 @@ def ing_prod_valor():
 
 def ing_prod_cant():
   id = buscar_max("productos.txt")
-  sku_prod = rnm_num()
-  producto = input("Ingrese SKU: ").upper()
-  cant_prod = input("Ingrese cantidad: ")
-  productos = {"id": id, "sku": sku_prod, "producto": producto, "cantidad": cant_prod}
+  nombre = input("Ingrese nombre del producto: ").upper()
+  rubro = input("Ingrese rubro: ").upper()
+  marca = input("Ingrese marca: ")
+  proveedor = input("Ingrese proveedor: ")
+  cantidad = int(input("Ingrese proveedor: "))
+  productos = {"id": id, "nombre": nombre, "rubro": rubro, "marca": marca, "proveedor": proveedor, "cantidad": cantidad}
 
-  data_productos = f"{productos['id']},{productos['sku']},{productos['producto']},{productos['cantidad']}\n"
+  data_productos = f"{productos['id']},{productos['nombre']},{productos['rubro']},{productos['proveedor']}, {productos['cantidad']}\n"
 
   try:
       with open("productos.txt", "a") as archivo:
@@ -206,15 +247,20 @@ def ing_prod_cant():
 
 def listar_productos():
     tabla = []
+    categorias = []
     try:
-        archivo = open("productos.txt", "r")
+        archivo = open("productos.txt", "r", encoding="UTF-8")
         for linea in archivo:
             palabra = linea.split(",")
             tabla.append(palabra)
-        print(f"\n{tabulate(tabla, headers=['ID','SKU','Producto','Cantidad'],tablefmt='presto')}\n")
+            if not palabra[2] in categorias:
+                categorias.append(palabra[2])
+        
+        
     except FileNotFoundError as error:
         print (error)
     finally:
+        return categorias, (f"\n{tabulate(tabla, headers=['ID','NOMBRE','RUBRO','PROVEEDOR', 'CANTIDAD'],tablefmt='presto', showindex='never', maxcolwidths=[None, 50])}\n")
         try:
             archivo.close()
         except NameError as error:
@@ -234,7 +280,8 @@ def main_menu():
         "7- Actualizar clientes",
         "8- Borrar registro clientes",
         "9- Borrar todos los productos",
-        "10- Borrar todos los clientes"
+        "10- Borrar todos los clientes",
+        "11- Venta"
     ]
 
     for opcion in opciones_main:
@@ -242,14 +289,14 @@ def main_menu():
 
     while True:
         try:
-            choice = int(input("Seleccione una opción (1-10): "))
+            choice = int(input("Seleccione una opción (1-11): "))
 
-            if 1 <= choice <= 10:
+            if 1 <= choice <= 11:
                 break
             else:
-                print("Opción fuera de rango. Seleccione una opción válida (1-10).")
+                print("Opción fuera de rango. Seleccione una opción válida (1-11).")
         except ValueError:
-            print("Entrada inválida. Ingrese un número del 1 al 10.")
+            print("Entrada inválida. Ingrese un número del 1 al 11.")
 
     if choice == 1:
         ing_cliente()
@@ -279,7 +326,9 @@ def main_menu():
     elif choice == 9:
         eliminar_archivo("productos.txt")
     elif choice == 10:
-        eliminar_archivo("clientes.txt")    
+        eliminar_archivo("clientes.txt")   
+    elif choice == 11:
+        venta() 
     else:
         print("Opción no válida")
 
