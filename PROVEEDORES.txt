@@ -1,4 +1,0 @@
-ID_proveedor	Proveedor	CUIT/Dirección	Telefono
-
-729         	ARCOR           	7262621           	LIMA 873	4587899
-890         	COCA-COLA       	2872722           	PERU 7161	8272734
