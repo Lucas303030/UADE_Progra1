@@ -45,7 +45,7 @@ def venta2():
 def validar_CUIT():
     while True:
         CUIT = input("Ingrese CUIT de cliente (Enter para omitir): ")
-        if CUIT.isnumeric() and len(CUIT) == 11:
+        if CUIT.isnumeric() and len(CUIT) == 11 and CUIT != "":
             return CUIT
         else:
             print("CUIT inválido. Debe contener exactamente 11 dígitos numéricos.")
@@ -89,7 +89,7 @@ def borrar_registro_clientes():
     
     archivo_original = "clientes.txt"
     archivo_temporal = "clientes_temp.txt"
-    
+    #Borrado logico
     encontrado = False
     
     try:
@@ -165,7 +165,7 @@ def buscar_max(archivo):
         print("No se puede leer el archivo")
         return "1"
 
-def validar_dni():
+def validar_dni():# Agregar excepciones
     while True:
         dni = input("Ingrese DNI de cliente (Enter para omitir): ")
         if dni.strip() == "":
@@ -181,7 +181,7 @@ def ing_cliente():
 
     while continuar == "S":
         id_cliente = buscar_max("clientes.txt")
-        nombre_cliente = input("Ingrese nombre de cliente: ").capitalize()
+        nombre_cliente = input("Ingrese nombre de cliente: ").capitalize() #Agregar not isnumeric
         apellido_cliente = input("Ingrese apellido de cliente: ").capitalize()
         dni = validar_dni()
         cuit = validar_CUIT()
@@ -220,7 +220,7 @@ def ing_cliente():
                     pass
 
 def ing_proveedor():
-  nombre_proveedor = input("Ingrese nombre de proveedor: ")
+  nombre_proveedor = input("Ingrese nombre de proveedor: ") #Agregar proveedor a proveedores.txt
   pass
 
 def ing_prod_valor():
@@ -234,7 +234,7 @@ def ing_prod_cant():
   marca = input("Ingrese marca: ")
   proveedor = input("Ingrese proveedor: ")
   cantidad = int(input("Ingrese proveedor: "))
-  productos = {"id": id, "nombre": nombre, "rubro": rubro, "marca": marca, "proveedor": proveedor, "cantidad": cantidad}
+  productos = {"id": id, "nombre": nombre, "rubro": rubro, "marca": marca, "proveedor": proveedor, "cantidad": cantidad} #Agregar campo precio
 
   data_productos = f"{productos['id']},{productos['nombre']},{productos['rubro']},{productos['proveedor']}, {productos['cantidad']}\n"
 
@@ -260,7 +260,7 @@ def listar_productos():
     except FileNotFoundError as error:
         print (error)
     finally:
-        return categorias, (f"\n{tabulate(tabla, headers=['ID','NOMBRE','RUBRO','PROVEEDOR', 'CANTIDAD'],tablefmt='presto', showindex='never', maxcolwidths=[None, 50])}\n")
+        return categorias, (f"\n{tabulate(tabla, headers=['ID','NOMBRE','RUBRO','PROVEEDOR', 'CANTIDAD'],tablefmt='presto', showindex='never', maxcolwidths=[None, 60])}\n")
         try:
             archivo.close()
         except NameError as error:
@@ -307,7 +307,8 @@ def main_menu():
     elif choice == 4:
         listar_clientes()
     elif choice == 5:
-        listar_productos()
+        a, b = listar_productos()
+        print (b)
     elif choice == 6:
         ing_prod_cant()
         pass
