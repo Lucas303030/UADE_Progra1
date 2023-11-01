@@ -71,7 +71,7 @@ def listar_clientes():
             palabra = linea.split(",")
             tabla.append(palabra)
 
-        print(f"\n{tabulate(tabla, headers=['id', 'mombre', 'apellido', 'DNI', 'CUIT', 'creado', 'modificado'],tablefmt='presto')}\n")
+        print(f"\n{tabulate(tabla, headers=['ID', 'Nombre', 'Apellido', 'DNI', 'CUIT', 'Creado', 'Modificado'],tablefmt='presto')}\n")
     except FileNotFoundError as error:
         print ("No se puede abrir el archivo", error)
     finally:
@@ -187,16 +187,16 @@ def ing_cliente():
         cuit = validar_CUIT()
 
         cliente = {
-            "id": id_cliente,
-            "nombre": nombre_cliente,
-            "apellido": apellido_cliente,
-            "dni": dni,
-            "cuit": cuit,
-            "creado": timestamp(),
-            "modificado": timestamp()
+            "ID": id_cliente,
+            "Nombre": nombre_cliente,
+            "Apellido": apellido_cliente,
+            "DNI": dni,
+            "CUIT": cuit,
+            "Creado": timestamp(),
+            "Modificado": timestamp()
         }
 
-        data_cliente = f"{cliente['id']},{cliente['nombre']},{cliente['apellido']},{cliente['dni']},{cliente['cuit']},{cliente['creado']},{cliente['modificado']}\n"
+        data_cliente = f"{cliente['ID']},{cliente['Nombre']},{cliente['Apellido']},{cliente['DNI']},{cliente['CUIT']},{cliente['Creado']},{cliente['Modificado']}\n"
 
         try:
             archivo = open("clientes.txt", "a")
@@ -234,9 +234,9 @@ def ing_prod_cant():
   marca = input("Ingrese marca: ")
   proveedor = input("Ingrese proveedor: ")
   cantidad = int(input("Ingrese proveedor: "))
-  productos = {"id": id, "nombre": nombre, "rubro": rubro, "marca": marca, "proveedor": proveedor, "cantidad": cantidad} #Agregar campo precio
+  productos = {"ID": id, "Nombre": nombre, "Rubro": rubro, "Marca": marca, "Proveedor": proveedor, "Cantidad": cantidad} #Agregar campo precio
 
-  data_productos = f"{productos['id']},{productos['nombre']},{productos['rubro']},{productos['proveedor']}, {productos['cantidad']}\n"
+  data_productos = f"{productos['ID']},{productos['Nombre']},{productos['Rubro']},{productos['Proveedor']}, {productos['Cantidad']}\n"
 
   try:
       with open("productos.txt", "a") as archivo:
@@ -260,7 +260,7 @@ def listar_productos():
     except FileNotFoundError as error:
         print (error)
     finally:
-        return categorias, (f"\n{tabulate(tabla, headers=['ID','NOMBRE','RUBRO','PROVEEDOR', 'CANTIDAD'],tablefmt='presto', showindex='never', maxcolwidths=[None, 60])}\n")
+        return categorias, (f"\n{tabulate(tabla, headers=['ID','Nombre','Rubro','Proveedor', 'Cantidad'],tablefmt='presto', showindex='never', maxcolwidths=[None, 60])}\n")
         try:
             archivo.close()
         except NameError as error:
