@@ -2,9 +2,10 @@ import os
 import random
 from tabulate import tabulate
 import datetime
+from funciones import productos, clientes, archivos
 
 def venta():
-    listar_clientes()
+    clientes.listar()
     id_cliente = str(input("Ingrese cliente: "))
     try:
         with open("clientes.txt", "r") as archivo:
@@ -15,32 +16,14 @@ def venta():
                     pass
     except FileNotFoundError:
         pass
-    venta2()
 
-def mostrar_productos_filtrados(categoria):
-    def filtro(categoria, linea):
-        return categoria in linea
-
-    tabla = []
-    try:
-        with open("productos.txt", "r", encoding="UTF-8") as archivo:
-            filtradas = filter(lambda linea: filtro(categoria, linea), archivo)
-            for linea in filtradas:
-                productos = linea.split(",")
-                tabla.append(productos)
-
-        print(tabulate(tabla))
-
-    except FileNotFoundError as error:
-        print(error)
-
-def venta2():
-    categorias, _ = listar_productos()
+    categorias, _ = productos.listar()
     
     for i in categorias:
         print(i)
     categoria = input("Ingrese el nombre de la categoria: ").upper()
-    mostrar_productos_filtrados(categoria)
+    productos.filtrar(categoria)
+
     
 def validar_CUIT():
     while True:
@@ -50,35 +33,8 @@ def validar_CUIT():
         else:
             print("CUIT inválido. Debe contener exactamente 11 dígitos numéricos.")
 
-def eliminar_archivo(ruta):
-    if os.path.exists(ruta):
-        confirmacion = input(f"Ingresar nombre de archivo para confirmar: ({ruta})")
-        if ruta == confirmacion:
-            os.remove(ruta)
-            print(f"El archivo {ruta} ha sido eliminado.")
-        else: 
-            print("Cancelado")
-            return ""
-    else:
-        print(f"No se encuentra el archivo {ruta}.")
 
-def listar_clientes():
-    
-    try:
-        tabla = []
-        archivo = open("clientes.txt", "r")
-        for linea in archivo:
-            palabra = linea.split(",")
-            tabla.append(palabra)
 
-        print(f"\n{tabulate(tabla, headers=['id', 'mombre', 'apellido', 'DNI', 'CUIT', 'creado', 'modificado'],tablefmt='presto')}\n")
-    except FileNotFoundError as error:
-        print ("No se puede abrir el archivo", error)
-    finally:
-        try:
-            archivo.close()
-        except FileNotFoundError as error:
-            pass
 
 def timestamp():
     modificado = datetime.datetime.now()
@@ -245,27 +201,15 @@ def ing_prod_cant():
   except Exception as error:
       print("Ocurrió un error al escribir en el archivo:", error)
 
-def listar_productos():
-    tabla = []
-    categorias = []
+
+def productos_mas_vendidos():
     try:
         archivo = open("productos.txt", "r", encoding="UTF-8")
-        for linea in archivo:
-            palabra = linea.split(",")
-            tabla.append(palabra)
-            if not palabra[2] in categorias:
-                categorias.append(palabra[2])
-        
-        
-    except FileNotFoundError as error:
-        print (error)
-    finally:
-        return categorias, (f"\n{tabulate(tabla, headers=['ID','NOMBRE','RUBRO','PROVEEDOR', 'CANTIDAD'],tablefmt='presto', showindex='never', maxcolwidths=[None, 60])}\n")
-        try:
-            archivo.close()
-        except NameError as error:
-            pass
-
+        linea = archivo.readline()
+        while linea:
+            columnas = linea.split()
+    except FileNotFoundError: 
+        print('No existe el archivo de productos') 
 def main_menu():
 
     os.system("cls")
@@ -281,7 +225,8 @@ def main_menu():
         "8- Borrar registro clientes",
         "9- Borrar todos los productos",
         "10- Borrar todos los clientes",
-        "11- Venta"
+        "11- Venta",
+        "12- Reporte - Productos más vendidos"
     ]
 
     for opcion in opciones_main:
@@ -307,7 +252,7 @@ def main_menu():
     elif choice == 4:
         listar_clientes()
     elif choice == 5:
-        a, b = listar_productos()
+        a, b = productos.listar()
         print (b)
     elif choice == 6:
         ing_prod_cant()
@@ -325,11 +270,13 @@ def main_menu():
         listar_clientes()
         borrar_registro_clientes()
     elif choice == 9:
-        eliminar_archivo("productos.txt")
+        ("productos.txt")
     elif choice == 10:
-        eliminar_archivo("clientes.txt")   
+        archivos.eliminar("clientes.txt")   
     elif choice == 11:
         venta() 
+    elif choice == 12:
+        productos_mas_vendidos()
     else:
         print("Opción no válida")
 
