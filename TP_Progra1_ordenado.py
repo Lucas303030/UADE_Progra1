@@ -239,7 +239,47 @@ def validar_dni():# Agregar excepciones
             print("DNI inválido. Debe contener exactamente 8 dígitos numéricos.")
     
     
+def validar_nombre_cliente():
+    while True:
+        nombre = input("Ingrese nombre de cliente: ").capitalize()
+        
+        if nombre.isalpha():
 
+            return nombre
+        else:
+            print("El nombre debe contener solo letras. Inténtelo nuevamente.")
+
+
+def validar_apellido_cliente():
+    while True:
+        apellido = input("Ingrese apellido de cliente: ").capitalize()
+        
+        if apellido.isalpha():
+
+            return apellido
+        else:
+            print("El apellido debe contener solo letras. Inténtelo nuevamente.")
+
+
+def validar_nombre_proveedores():
+    while True:
+        nombre = input("Ingrese nombre de proveedor: ").capitalize()
+        
+        if nombre.isalpha():
+
+            return nombre
+        else:
+            print("El nombre debe contener solo letras. Inténtelo nuevamente.")
+
+def validar_apellido_proveedores():
+    while True:
+        apellido = input("Ingrese apellido de proveedor: ").capitalize()
+        
+        if apellido.isalpha():
+
+            return apellido
+        else:
+            print("El apellido debe contener solo letras. Inténtelo nuevamente.")
 
 
 def ing_cliente():
@@ -248,8 +288,8 @@ def ing_cliente():
 
     while continuar == "S":
         id_cliente = buscar_max("clientes.txt")
-        nombre_cliente = input("Ingrese nombre de cliente: ").capitalize() #Agregar not isnumeric
-        apellido_cliente = input("Ingrese apellido de cliente: ").capitalize()
+        nombre_cliente = validar_nombre_cliente()
+        apellido_cliente = validar_apellido_cliente()
         dni = validar_dni()
         cuit = validar_CUIT()
 
