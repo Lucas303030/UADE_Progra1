@@ -5,6 +5,11 @@ import datetime
 COLUMNAS_PRODUCTOS = ['ID', 'Nombre', 'Cat.', 'Marca', 'proov.', 'Precio']
 COLUMNAS_CLIENTES = ['id', 'Nombre', 'Apellido', 'DNI', 'CUIL', 'Fecha alta', 'Fecha modificacion']
 
+
+
+
+
+
 def tabulador(registros, columnas):
     anchos = []
     for columna in range(len(columnas)):
@@ -223,7 +228,7 @@ def buscar_max(archivo):
         print("No se puede leer el archivo")
         return "1"
 
-def validar_dni():# Agregar excepciones
+def validar_dni():# Agregar excepciones   
     while True:
         dni = input("Ingrese DNI de cliente (Enter para omitir): ")
         if dni.strip() == "":
@@ -232,6 +237,10 @@ def validar_dni():# Agregar excepciones
             return dni
         else:
             print("DNI inválido. Debe contener exactamente 8 dígitos numéricos.")
+    
+    
+
+
 
 def ing_cliente():
 
@@ -493,3 +502,18 @@ def main_menu():
 
 
 main_menu()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
