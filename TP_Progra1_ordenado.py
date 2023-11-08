@@ -1,48 +1,106 @@
 import os
 import random
-from tabulate import tabulate
 import datetime
 
-def venta():
-    listar_clientes()
-    id_cliente = str(input("Ingrese cliente: "))
-    try:
-        with open("clientes.txt", "r") as archivo:
-            for line in archivo:
-                lista_campos = line.split(",")
-                if lista_campos[0] == id_cliente:
-                    # print(lista_campos[1], lista_campos[2], lista_campos[4])
-                    pass
-    except FileNotFoundError:
-        pass
-    venta2()
+COLUMNAS_PRODUCTOS = ['ID', 'Nombre', 'Cat.', 'Marca', 'proov.', 'Precio']
+COLUMNAS_CLIENTES = ['id', 'Nombre', 'Apellido', 'DNI', 'CUIL', 'Fecha alta', 'Fecha modificacion']
 
-def mostrar_productos_filtrados(categoria):
+def tabulador(registros, columnas):
+    anchos = []
+    for columna in range(len(columnas)):
+        ancho = 6
+        for linea in registros:
+            ancho_palabara = len(linea[columna])
+            if ancho_palabara > ancho:
+                ancho = ancho_palabara
+        anchos.append(ancho) 
+                
+    print(anchos)
+    
+    encabezado = " | ".join(f'{columnas[x]:{anchos[x]}}' for x in range(len(columnas)))
+    separador =  " + ".join("-"*anchos[x] for x in range(len(columnas)))
+
+    filas_datos = []
+    for fila in registros:
+        fila_datos =  " | ".join(f'{fila[x]:{anchos[x]}}' for x in range(len(columnas)))
+        filas_datos.append(fila_datos)
+
+    tabla = f'{encabezado}\n{separador}\n' + '\n'.join(filas_datos)
+
+    return tabla
+
+def venta():
+    clientes = leer_clientes()
+    print(tabulador(clientes, COLUMNAS_CLIENTES))
+   
+
+    cliente_encontrado = 0
+    id = input('Ingrese id de cliente')
+    while cliente_encontrado == 0: 
+        for cliente in clientes:
+            if cliente[0] == id:
+                cliente_encontrado = id
+        if cliente_encontrado == 0:
+            print('No se encontró el cliente')
+            id = input('Ingrese id de cliente')
+
+
+    categorias, productos = leer_productos()
+    
+    print(tabulador([[x] for x in categorias], ['Categorias']))
+
+    categoria_encontrada = 0
+    categoria = f'"{input("Ingrese el nombre de la categoria: ").upper()}"'
+    
+    while categoria_encontrada == 0:
+        if categoria in categorias:
+            categoria_encontrada = categoria
+        else:
+            print('No se encontró la categoría')
+            categoria = input("Ingrese el nombre de la categoria: ")
+
     def filtro(categoria, linea):
         return categoria in linea
+    productos_filtrados = list(filter(lambda linea: filtro(categoria, linea), productos)) 
+    print(tabulador(productos_filtrados,COLUMNAS_PRODUCTOS))
+    
+    producto_encontrado = 0
+    id = input('Ingrese id de producto')
+    while producto_encontrado == 0: 
+        for producto in productos_filtrados:
+            if producto[0] == id:
+                producto_encontrado = id
+                precio_unidad = producto[5]
+        if producto_encontrado == 0:
+            print('No se encontró el producto')
+            id = input('Ingrese id de producto')
 
-    tabla = []
+    print('Producto seleccionado exitosamente: '+id)
+
+    while True:
+        try:
+            cantidad = int(input('Ingrese cantidad vendida '))
+            break
+        except TypeError:
+            print('introduzca una cantidad valida ') 
+
+    total = float(precio_unidad) * cantidad
+    id = buscar_max('ventas.txt')
+    data_venta =  f"{id},{cliente_encontrado},{producto_encontrado},{cantidad},{total},{timestamp()},{timestamp()}\n"
+
     try:
-        with open("productos.txt", "r", encoding="UTF-8") as archivo:
-            filtradas = filter(lambda linea: filtro(categoria, linea), archivo)
-            for linea in filtradas:
-                productos = linea.split(",")
-                tabla.append(productos)
+        archivo = open("ventas.txt", "a")
+        archivo.write(data_venta)
+        print("Registro guardado")
+    except Exception as error:
+        print("Ocurrió un error al escribir en el archivo:", error)
+    finally:
+        try:
+            archivo.close()
+        except FileNotFoundError as error:
+            pass
+           
 
-        print(tabulate(tabla))
-
-    except FileNotFoundError as error:
-        print(error)
-
-def venta2():
-    categorias, _ = listar_productos()
-    
-    for i in categorias:
-        print(i)
-    categoria = input("Ingrese el nombre de la categoria: ")
-    categoria = categoria.upper()
-    mostrar_productos_filtrados(categoria)
-    
 def validar_CUIT():
     while True:
         CUIT = input("Ingrese CUIT de cliente (Enter para omitir): ")
@@ -63,16 +121,14 @@ def eliminar_archivo(ruta):
     else:
         print(f"No se encuentra el archivo {ruta}.")
 
-def listar_clientes():
-    
+def leer_clientes():
     try:
-        tabla = []
+        registros = []
         archivo = open("clientes.txt", "r")
         for linea in archivo:
             palabra = linea.split(",")
-            tabla.append(palabra)
-
-        print(f"\n{tabulate(tabla, headers=['ID', 'Nombre', 'Apellido', 'DNI', 'CUIT', 'Creado', 'Modificado'],tablefmt='presto')}\n")
+            registros.append(palabra)
+        return registros
     except FileNotFoundError as error:
         print ("No se puede abrir el archivo", error)
     finally:
@@ -155,13 +211,14 @@ def rnm_num():
 def buscar_max(archivo):
     list_id = []
     try:
-        with open(archivo, "r") as archivo:
+        with open(archivo, "r",encoding="UTF-8") as archivo:
             for line in archivo:
-                list_id.append(line[0])
-            print(list_id)
+                list_id.append(int(line.split(",")[0]))
             if len(list_id) != 0:
-                maximo = int(max(list_id)) + 1
+                maximo = max(list_id) + 1
                 return maximo
+            else: 
+                return "1"
     except FileNotFoundError as error:
         print("No se puede leer el archivo")
         return "1"
@@ -235,9 +292,8 @@ def ing_prod_cant():
   marca = input("Ingrese marca: ")
   proveedor = input("Ingrese proveedor: ")
   cantidad = int(input("Ingrese cantidad: "))
-  productos = {"ID": id, "Nombre": nombre, "Rubro": rubro, "Marca": marca, "Proveedor": proveedor, "Cantidad": cantidad} #Agregar campo precio
 
-  data_productos = f"{productos['ID']},{productos['Nombre']},{productos['Rubro']},{productos['Proveedor']}, {productos['Cantidad']}\n"
+  data_productos = f'{id},"{nombre}","{rubro}","{marca}",{proveedor},{cantidad}\n'
 
   try:
       with open("productos.txt", "a") as archivo:
@@ -246,14 +302,14 @@ def ing_prod_cant():
   except Exception as error:
       print("Ocurrió un error al escribir en el archivo:", error)
 
-def listar_productos():
-    tabla = []
+def leer_productos():
+    productos = []
     categorias = []
     try:
         archivo = open("productos.txt", "r", encoding="UTF-8")
-        for linea in archivo:
-            palabra = linea.split(",")
-            tabla.append(palabra)
+        for registro in archivo:
+            palabra = registro.split(",")
+            productos.append(palabra)
             if not palabra[2] in categorias:
                 categorias.append(palabra[2])
         
@@ -261,7 +317,7 @@ def listar_productos():
     except FileNotFoundError as error:
         print (error)
     finally:
-        return categorias, (f"\n{tabulate(tabla, headers=['ID','Nombre','Rubro','Proveedor', 'Cantidad'],tablefmt='presto', showindex='never', maxcolwidths=[None, 60])}\n")
+        return categorias, productos
         try:
             archivo.close()
         except NameError as error:
@@ -296,7 +352,7 @@ def ingresos():
     elif choice == 2:
         ing_proveedor()
     elif choice == 3:
-        ing_prod_valor()
+        ing_prod_cant()
 
 def actualizaciones():
     opciones_actualizaciones = [
@@ -323,7 +379,8 @@ def actualizaciones():
     if choice == 1:
         ing_prod_valor()
     elif choice == 2:
-        listar_clientes()
+        clientes = leer_clientes()
+        print(tabulador(clientes, COLUMNAS_CLIENTES))
         id_busqueda = input("Ingrese ID a editar: ")
         nuevo_nombre = input("Ingrese nuevo nombre: ")
         nuevo_apellido = input("Ingrese nuevo apellido: ")
@@ -336,7 +393,6 @@ def listados():
     opciones_listados = [
         "1- Listar clientes",
         "2- Listar productos",
-        
     ]
 
     for opcion in opciones_listados:
@@ -355,10 +411,11 @@ def listados():
 
             print("Entrada inválida. Ingrese un número del 1 al 2.")
     if choice == 1:
-        listar_clientes()
+        clientes = leer_clientes()
+        print(tabulador(clientes, COLUMNAS_CLIENTES))
     elif choice == 2:
-        a, b = listar_productos()
-        print (b)
+        _, productos = leer_productos()
+        print(tabulador(productos, COLUMNAS_PRODUCTOS))
 
 def borrar():
         opciones_borrar =[
@@ -383,7 +440,7 @@ def borrar():
 
                 print("Entrada inválida. Ingrese un número del 1 al 3.")
         if choice == 1:
-            listar_clientes()
+            print(leer_clientes())
             borrar_registro_clientes()
         elif choice == 2:
             eliminar_archivo("productos.txt")
