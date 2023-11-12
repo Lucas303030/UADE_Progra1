@@ -4,6 +4,7 @@ import datetime
 
 COLUMNAS_PRODUCTOS = ['ID', 'Nombre', 'Cat.', 'Marca', 'proov.', 'Precio', 'Stock']
 COLUMNAS_CLIENTES = ['id', 'Nombre', 'Apellido', 'DNI', 'CUIL', 'Fecha alta', 'Fecha modificacion']
+COLUMNAS_VENTAS = []
 
 def tabulador(registros, columnas):
     anchos = []
@@ -30,11 +31,20 @@ def tabulador(registros, columnas):
 
     return tabla
 
+def carrito(num_carrito):
+    print(f"\nNumero de orden: {num_carrito}\n")
+    with open("ventas.txt", "r", encoding="UTF-8") as archivo:
+        total = 0   
+        for linea in archivo:
+            campos = linea.split(",")
+            if campos[0] == str(num_carrito):
+                total += float(campos[4])
+                print(f"Producto: {campos[2]}, Unidad/es: {campos[3]}, Total: $ {campos[4]}")
+        print (f"Total: $ {total}")
+
 def venta():
     clientes = leer_clientes()
     print(tabulador(clientes, COLUMNAS_CLIENTES))
-   
-
     cliente_encontrado = 0
     id = input('Ingrese id de cliente')
     while cliente_encontrado == 0: 
@@ -45,61 +55,70 @@ def venta():
             print('No se encontró el cliente')
             id = input('Ingrese id de cliente')
 
+    num_carrito = buscar_max("ventas.txt")
+    print(f"Numero de orden: {num_carrito}")
+    continuar = "S"
+    while continuar == "S":
+        categorias, productos = leer_productos()
+        
+        print(tabulador([[x] for x in categorias], ['Categorias']))
 
-    categorias, productos = leer_productos()
+        categoria_encontrada = 0
+        categoria = f'"{input("Ingrese el nombre de la categoria: ").upper()}"'
+        
+        while categoria_encontrada == 0:
+            if categoria in categorias:
+                categoria_encontrada = categoria
+            else:
+                print('No se encontró la categoría')
+                categoria = input("Ingrese el nombre de la categoria: ")
+
+        def filtro(categoria, linea):
+            return categoria in linea
+        productos_filtrados = list(filter(lambda linea: filtro(categoria, linea), productos)) 
+        print(tabulador(productos_filtrados,COLUMNAS_PRODUCTOS))
+        
+        producto_encontrado = 0
+        id = input('Ingrese id de producto')
+        while producto_encontrado == 0: 
+            for producto in productos_filtrados:
+                if producto[0] == id:
+                    producto_encontrado = id
+                    nombre_prdo = producto[1]
+                    precio_unidad = producto[5]
+            if producto_encontrado == 0:
+                print('No se encontró el producto')
+                id = input('Ingrese id de producto')
+
+        print('Producto seleccionado exitosamente: '+id)
+
+        while True:
+            try:
+                cantidad = int(input('Ingrese cantidad vendida '))
+                break
+            except TypeError:
+                print('introduzca una cantidad valida ') 
+
+        total = float(precio_unidad) * cantidad
+        id = buscar_max('ventas.txt')
+        data_venta =  f"{num_carrito},{cliente_encontrado},{nombre_prdo},{cantidad},{total},{timestamp()},{timestamp()}\n"
+        print(f"Datos venta:\n{data_venta}" )
+
     
-    print(tabulador([[x] for x in categorias], ['Categorias']))
-
-    categoria_encontrada = 0
-    categoria = f'"{input("Ingrese el nombre de la categoria: ").upper()}"'
-    
-    while categoria_encontrada == 0:
-        if categoria in categorias:
-            categoria_encontrada = categoria
-        else:
-            print('No se encontró la categoría')
-            categoria = input("Ingrese el nombre de la categoria: ")
-
-    def filtro(categoria, linea):
-        return categoria in linea
-    productos_filtrados = list(filter(lambda linea: filtro(categoria, linea), productos)) 
-    print(tabulador(productos_filtrados,COLUMNAS_PRODUCTOS))
-    
-    producto_encontrado = 0
-    id = input('Ingrese id de producto')
-    while producto_encontrado == 0: 
-        for producto in productos_filtrados:
-            if producto[0] == id:
-                producto_encontrado = id
-                precio_unidad = producto[5]
-        if producto_encontrado == 0:
-            print('No se encontró el producto')
-            id = input('Ingrese id de producto')
-
-    print('Producto seleccionado exitosamente: '+id)
-
-    while True:
         try:
-            cantidad = int(input('Ingrese cantidad vendida '))
-            break
-        except TypeError:
-            print('introduzca una cantidad valida ') 
+            archivo = open("ventas.txt", "a")
+            archivo.write(data_venta)
+            print("Registro guardado")
+        except Exception as error:
+            print("Ocurrió un error al escribir en el archivo:", error)
+        finally:
+            try:
+                archivo.close()
+                continuar = input("¿Continuar? ")
+            except FileNotFoundError as error:
+                pass
 
-    total = float(precio_unidad) * cantidad
-    id = buscar_max('ventas.txt')
-    data_venta =  f"{id},{cliente_encontrado},{producto_encontrado},{cantidad},{total},{timestamp()},{timestamp()}\n"
-
-    try:
-        archivo = open("ventas.txt", "a")
-        archivo.write(data_venta)
-        print("Registro guardado")
-    except Exception as error:
-        print("Ocurrió un error al escribir en el archivo:", error)
-    finally:
-        try:
-            archivo.close()
-        except FileNotFoundError as error:
-            pass
+        carrito(num_carrito)
            
 
 def validar_CUIT():
@@ -569,18 +588,3 @@ def main_menu():
 
 
 main_menu()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
