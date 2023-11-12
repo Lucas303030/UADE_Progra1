@@ -355,15 +355,30 @@ def ing_prod_valor():
 
     id_modificar = int(input("Ingrese ID de producto a modificar: "))
 
+    campos_posibles = ['ID',
+                       'Nombre', 
+                       'Cat.', 
+                       'Marca', 
+                       'proov.', 
+                       'Precio', 
+                       'Stock']
+
+    # Muestra los campos posibles para modificar
+    print("Campos disponibles para modificar:", campos_posibles)
+    campo_a_modificar = input("Ingrese el nombre del campo a modificar: ")
+
+    if campo_a_modificar not in campos_posibles:
+        print("Campo no válido. Seleccione un campo válido.")
+        return
+
     with open("productos.txt", "r+", encoding="UTF-8") as archivo:
         encontrado = False
         while not encontrado:
             pos_actual = archivo.tell()
             linea = archivo.readline()
-            
+
             if not linea:
                 print(f"No se encontró un producto con el ID {id_modificar}.")
-                break
 
             campos = linea.strip().split(",")
             id_actual = campos[0]
@@ -372,12 +387,25 @@ def ing_prod_valor():
                 encontrado = True
                 print(f"El artículo se encuentra en la línea {pos_actual}.")
                 print(f"Contenido de la línea: {linea}")
-                nuevo_valor = float(input(f"Ingrese el nuevo valor para el campo precio. Precio actual: {campos[5]}: "))
-                campos[5] = str(nuevo_valor)
+
+                try:
+                    indice_campo = campos_posibles.index(campo_a_modificar)
+                    valor_actual = campos[indice_campo]
+                    nuevo_valor = input(f"Ingrese el nuevo valor para el campo {campo_a_modificar}. Valor actual: {valor_actual}: ")
+
+                    longitud_actual = len(valor_actual)
+                    nuevo_valor = str(nuevo_valor).ljust(longitud_actual)
+                except ValueError:
+                    print("Entrada inválida. Ingrese un valor válido.")
+
+                campos[indice_campo] = nuevo_valor
                 archivo.seek(pos_actual)
                 archivo.write(",".join(campos))
 
                 print("Campo modificado exitosamente.")
+
+# Resto del código...
+
 
 def ing_prod_cant():
   id = buscar_max("productos.txt")
@@ -452,7 +480,7 @@ def ingresos():
 def actualizaciones():
     opciones_actualizaciones = [
 
-        "1- Actualizar precios de productos",
+        "1- Actualizar datos de prodcutos",
         "2- Actualizar clientes",
     ]
 
