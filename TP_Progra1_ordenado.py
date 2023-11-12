@@ -2,32 +2,28 @@ import os
 import random
 import datetime
 
-COLUMNAS_PRODUCTOS = ['ID', 'Nombre', 'Cat.', 'Marca', 'proov.', 'Precio']
+COLUMNAS_PRODUCTOS = ['ID', 'Nombre', 'Cat.', 'Marca', 'proov.', 'Precio', 'Stock']
 COLUMNAS_CLIENTES = ['id', 'Nombre', 'Apellido', 'DNI', 'CUIL', 'Fecha alta', 'Fecha modificacion']
-
-
-
-
-
 
 def tabulador(registros, columnas):
     anchos = []
     for columna in range(len(columnas)):
-        ancho = 6
+        ancho = 7
         for linea in registros:
-            ancho_palabara = len(linea[columna])
-            if ancho_palabara > ancho:
-                ancho = ancho_palabara
+            if columna < len(linea):  # Verifica que el índice sea válido
+                ancho_palabra = len(str(linea[columna]))
+                if ancho_palabra > ancho:
+                    ancho = ancho_palabra
         anchos.append(ancho) 
-                
+    
     print(anchos)
     
     encabezado = " | ".join(f'{columnas[x]:{anchos[x]}}' for x in range(len(columnas)))
-    separador =  " + ".join("-"*anchos[x] for x in range(len(columnas)))
+    separador = " + ".join("-"*anchos[x] for x in range(len(columnas)))
 
     filas_datos = []
     for fila in registros:
-        fila_datos =  " | ".join(f'{fila[x]:{anchos[x]}}' for x in range(len(columnas)))
+        fila_datos = " | ".join(f'{fila[x]:{anchos[x]}}' if x < len(fila) else ' ' * anchos[x] for x in range(len(columnas)))
         filas_datos.append(fila_datos)
 
     tabla = f'{encabezado}\n{separador}\n' + '\n'.join(filas_datos)
@@ -219,6 +215,7 @@ def buscar_max(archivo):
         with open(archivo, "r",encoding="UTF-8") as archivo:
             for line in archivo:
                 list_id.append(int(line.split(",")[0]))
+                print(list_id)
             if len(list_id) != 0:
                 maximo = max(list_id) + 1
                 return maximo
@@ -283,7 +280,6 @@ def validar_apellido_proveedores():
 
 
 def ing_cliente():
-
     continuar = "S"
 
     while continuar == "S":
@@ -292,6 +288,7 @@ def ing_cliente():
         apellido_cliente = validar_apellido_cliente()
         dni = validar_dni()
         cuit = validar_CUIT()
+        dni_existe = False
 
         cliente = {
             "ID": id_cliente,
@@ -300,39 +297,69 @@ def ing_cliente():
             "DNI": dni,
             "CUIT": cuit,
             "Creado": timestamp(),
-            "Modificado": timestamp()
+            "Modificado": timestamp(),
+            "isactive": True
         }
 
-        data_cliente = f"{cliente['ID']},{cliente['Nombre']},{cliente['Apellido']},{cliente['DNI']},{cliente['CUIT']},{cliente['Creado']},{cliente['Modificado']}\n"
+        try:
+            with open("clientes.txt", "r") as archivo:
+                for linea in archivo:
+                    campo = linea.split(",")
+                    if campo[3] == dni:
+                        print(f'Ya existe un cliente con el DNI "{campo[3]}".')
+                        dni_existe = True
+        except FileNotFoundError:
+            print("No existe el archivo")
+        except IOError as e:
+            print(f"Error de entrada/salida: {e}")
+
+        data_cliente = f"{cliente['ID']},{cliente['Nombre']},{cliente['Apellido']},{cliente['DNI']},{cliente['CUIT']},{cliente['Creado']},{cliente['Modificado']},{cliente['isactive']}\n"
 
         try:
-            archivo = open("clientes.txt", "a")
-            archivo.write(data_cliente)
-            print("Registro guardado")
+            if not dni_existe:
+                with open("clientes.txt", "a") as archivo:
+                    archivo.write(data_cliente)
+                    print("Registro guardado")
+        except IOError as e:
+            print(f"Ocurrió un error al escribir en el archivo: {e}")
 
-        except Exception as error:
-            print("Ocurrió un error al escribir en el archivo:", error)
+        if continuar == "S":
+            continuar = input("¿Agregar otro registro (S/N)?: ").upper()
 
-        finally:
-            if continuar == "S":
-                try:
-                    archivo.close()
-                    continuar = input("¿Agregar otro registro (S/N) ?: ").upper()
-                except FileNotFoundError as error:
-                    pass
-            else:
-                try:
-                    archivo.close()
-                except FileNotFoundError as error:
-                    pass
 
 def ing_proveedor():
   nombre_proveedor = input("Ingrese nombre de proveedor: ") #Agregar proveedor a proveedores.txt
   pass
 
 def ing_prod_valor():
-  valor_prod = float(input("Ingrese precio: "))
-  pass
+    _, productos = leer_productos()
+    print(tabulador(productos, COLUMNAS_PRODUCTOS))
+
+    id_modificar = int(input("Ingrese ID de producto a modificar: "))
+
+    with open("productos.txt", "r+", encoding="UTF-8") as archivo:
+        encontrado = False
+        while not encontrado:
+            pos_actual = archivo.tell()
+            linea = archivo.readline()
+            
+            if not linea:
+                print(f"No se encontró un producto con el ID {id_modificar}.")
+                break
+
+            campos = linea.strip().split(",")
+            id_actual = campos[0]
+
+            if str(id_modificar) == id_actual:
+                encontrado = True
+                print(f"El artículo se encuentra en la línea {pos_actual}.")
+                print(f"Contenido de la línea: {linea}")
+                nuevo_valor = float(input(f"Ingrese el nuevo valor para el campo precio. Precio actual: {campos[5]}: "))
+                campos[5] = str(nuevo_valor)
+                archivo.seek(pos_actual)
+                archivo.write(",".join(campos))
+
+                print("Campo modificado exitosamente.")
 
 def ing_prod_cant():
   id = buscar_max("productos.txt")
@@ -340,9 +367,10 @@ def ing_prod_cant():
   rubro = input("Ingrese rubro: ").upper()
   marca = input("Ingrese marca: ")
   proveedor = input("Ingrese proveedor: ")
+  precio = float(input("Ingrese precio: "))
   cantidad = int(input("Ingrese cantidad: "))
 
-  data_productos = f'{id},"{nombre}","{rubro}","{marca}",{proveedor},{cantidad}\n'
+  data_productos = f'{id},"{nombre}","{rubro}","{marca}",{proveedor},{precio},{cantidad}\n'
 
   try:
       with open("productos.txt", "a") as archivo:
