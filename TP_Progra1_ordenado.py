@@ -215,7 +215,6 @@ def buscar_max(archivo):
         with open(archivo, "r",encoding="UTF-8") as archivo:
             for line in archivo:
                 list_id.append(int(line.split(",")[0]))
-                print(list_id)
             if len(list_id) != 0:
                 maximo = max(list_id) + 1
                 return maximo
