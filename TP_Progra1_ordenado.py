@@ -46,14 +46,14 @@ def venta():
     clientes = leer_clientes()
     print(tabulador(clientes, COLUMNAS_CLIENTES))
     cliente_encontrado = 0
-    id = input('Ingrese id de cliente')
+    id = input('Ingrese id de cliente: ')
     while cliente_encontrado == 0: 
         for cliente in clientes:
             if cliente[0] == id:
                 cliente_encontrado = id
         if cliente_encontrado == 0:
-            print('No se encontró el cliente')
-            id = input('Ingrese id de cliente')
+            print('No se encontró el cliente.')
+            id = input('Ingrese id de cliente: ')
 
     num_carrito = buscar_max("ventas.txt")
     print(f"Numero de orden: {num_carrito}")
@@ -70,7 +70,7 @@ def venta():
             if categoria in categorias:
                 categoria_encontrada = categoria
             else:
-                print('No se encontró la categoría')
+                print('No se encontró la categoría.')
                 categoria = input("Ingrese el nombre de la categoria: ")
 
         def filtro(categoria, linea):
@@ -79,7 +79,7 @@ def venta():
         print(tabulador(productos_filtrados,COLUMNAS_PRODUCTOS))
         
         producto_encontrado = 0
-        id = input('Ingrese id de producto')
+        id = input('Ingrese id de producto: ')
         while producto_encontrado == 0: 
             for producto in productos_filtrados:
                 if producto[0] == id:
@@ -87,17 +87,17 @@ def venta():
                     nombre_prdo = producto[1]
                     precio_unidad = producto[5]
             if producto_encontrado == 0:
-                print('No se encontró el producto')
-                id = input('Ingrese id de producto')
+                print('No se encontró el producto.')
+                id = input('Ingrese id de producto: ')
 
         print('Producto seleccionado exitosamente: '+id)
 
         while True:
             try:
-                cantidad = int(input('Ingrese cantidad vendida '))
+                cantidad = int(input('Ingrese cantidad vendida: '))
                 break
             except TypeError:
-                print('introduzca una cantidad valida ') 
+                print('introduzca una cantidad valida: ') 
 
         total = float(precio_unidad) * cantidad
         id = buscar_max('ventas.txt')
@@ -108,9 +108,9 @@ def venta():
         try:
             archivo = open("ventas.txt", "a")
             archivo.write(data_venta)
-            print("Registro guardado")
+            print("Registro guardado.")
         except Exception as error:
-            print("Ocurrió un error al escribir en el archivo:", error)
+            print("Ocurrió un error al escribir en el archivo: ", error)
         finally:
             try:
                 archivo.close()
