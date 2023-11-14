@@ -11,7 +11,7 @@ def tabulador(registros, columnas):
     for columna in range(len(columnas)):
         ancho = 8
         for linea in registros:
-            if columna < len(linea):  # Verifica que el índice sea válido
+            if columna < len(linea):  
                 ancho_palabra = len(str(linea[columna]))
                 if ancho_palabra > ancho:
                     ancho = ancho_palabra
@@ -185,7 +185,6 @@ def borrar_registro_clientes():
     
     archivo_original = "clientes.txt"
     archivo_temporal = "clientes_temp.txt"
-    #Borrado logico
     encontrado = False
     
     try:
@@ -261,7 +260,7 @@ def buscar_max(archivo):
         print("No se puede leer el archivo")
         return "1"
 
-def validar_dni():# Agregar excepciones   
+def validar_dni():  
     while True:
         dni = input("Ingrese DNI de cliente (Enter para omitir): ")
         if dni.strip() == "":
