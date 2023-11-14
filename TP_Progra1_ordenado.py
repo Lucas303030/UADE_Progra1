@@ -2,14 +2,14 @@ import os
 import random
 import datetime
 
-COLUMNAS_PRODUCTOS = ['ID', 'Nombre', 'Cat.', 'Marca', 'proov.', 'Precio', 'Stock']
-COLUMNAS_CLIENTES = ['id', 'Nombre', 'Apellido', 'DNI', 'CUIL', 'Fecha alta', 'Fecha modificacion']
+COLUMNAS_PRODUCTOS = ['ID', 'Nombre', 'Cat.', 'Marca', 'proov.', 'Precio', 'Stock', 'Activo']
+COLUMNAS_CLIENTES = ['id', 'Nombre', 'Apellido', 'DNI', 'CUIL', 'Fecha alta', 'Fecha modificacion', 'Activo']
 COLUMNAS_VENTAS = []
 
 def tabulador(registros, columnas):
     anchos = []
     for columna in range(len(columnas)):
-        ancho = 7
+        ancho = 8
         for linea in registros:
             if columna < len(linea):  # Verifica que el índice sea válido
                 ancho_palabra = len(str(linea[columna]))
@@ -99,6 +99,26 @@ def venta():
             except TypeError:
                 print('introduzca una cantidad valida: ') 
 
+        with open("productos.txt", "r+", encoding="UTF-8") as archivo:
+            encontrado = False
+            while encontrado == False:
+                pos_inicio_linea = archivo.tell()
+                lineas = archivo.readline()
+                campos = lineas.strip().split(",")
+
+                if campos[0] == id and campos[7] == "1":
+                    resultado = int(campos[6]) - cantidad
+                    campos[6] = str(resultado)
+                    nueva_linea = ",".join(campos)
+                    print (nueva_linea)
+                    archivo.seek(pos_inicio_linea)
+                    archivo.write(nueva_linea)
+
+                    print(f"Stock resultante: {resultado}")
+
+                    encontrado = True
+
+
         total = float(precio_unidad) * cantidad
         id = buscar_max('ventas.txt')
         data_venta =  f"{num_carrito},{cliente_encontrado},{nombre_prdo},{cantidad},{total},{timestamp()},{timestamp()}\n"
@@ -118,8 +138,7 @@ def venta():
             except FileNotFoundError as error:
                 pass
 
-        carrito(num_carrito)
-           
+        carrito(num_carrito)      
 
 def validar_CUIT():
     while True:
@@ -207,12 +226,11 @@ def editar_cliente(id_cliente, nuevo_nombre, nuevo_apellido, nuevo_dni, nuevo_cu
         for linea in lineas:
             datos = linea.strip().split(',')
             if datos[0] == id_cliente:
-                # Editar los campos del cliente
                 datos[1] = nuevo_nombre
                 datos[2] = nuevo_apellido
                 datos[3] = nuevo_dni
                 datos[4] = nuevo_cuit
-                datos[-1] = str(timestamp()) 
+                datos[-2] = str(timestamp()) 
                 nueva_linea = ','.join(datos) + '\n'
                 archivo.write(nueva_linea)
                 encontrado = True
@@ -296,7 +314,6 @@ def validar_apellido_proveedores():
         else:
             print("El apellido debe contener solo letras. Inténtelo nuevamente.")
 
-
 def ing_cliente():
     continuar = "S"
 
@@ -316,7 +333,7 @@ def ing_cliente():
             "CUIT": cuit,
             "Creado": timestamp(),
             "Modificado": timestamp(),
-            "isactive": True
+            "isactive": "1"
         }
 
         try:
@@ -328,8 +345,8 @@ def ing_cliente():
                         dni_existe = True
         except FileNotFoundError:
             print("No existe el archivo")
-        except IOError as e:
-            print(f"Error de entrada/salida: {e}")
+        except IOError as error:
+            print(f"Error de entrada/salida: {error}")
 
         data_cliente = f"{cliente['ID']},{cliente['Nombre']},{cliente['Apellido']},{cliente['DNI']},{cliente['CUIT']},{cliente['Creado']},{cliente['Modificado']},{cliente['isactive']}\n"
 
@@ -343,7 +360,6 @@ def ing_cliente():
 
         if continuar == "S":
             continuar = input("¿Agregar otro registro (S/N)?: ").upper()
-
 
 def ing_proveedor():
   nombre_proveedor = input("Ingrese nombre de proveedor: ") #Agregar proveedor a proveedores.txt
@@ -361,9 +377,9 @@ def ing_prod_valor():
                        'Marca', 
                        'proov.', 
                        'Precio', 
-                       'Stock']
+                       'Stock',
+                       'Activo']
 
-    # Muestra los campos posibles para modificar
     print("Campos disponibles para modificar:", campos_posibles)
     campo_a_modificar = input("Ingrese el nombre del campo a modificar: ")
 
@@ -383,9 +399,9 @@ def ing_prod_valor():
             campos = linea.strip().split(",")
             id_actual = campos[0]
 
-            if str(id_modificar) == id_actual:
+            if str(id_modificar) == id_actual and campos[7] == "1":
                 encontrado = True
-                print(f"El artículo se encuentra en la línea {pos_actual}.")
+                print(f"El artículo se encuentra en la posicion {pos_actual}.")
                 print(f"Contenido de la línea: {linea}")
 
                 try:
@@ -397,15 +413,15 @@ def ing_prod_valor():
                     nuevo_valor = str(nuevo_valor).ljust(longitud_actual)
                 except ValueError:
                     print("Entrada inválida. Ingrese un valor válido.")
-
-                campos[indice_campo] = nuevo_valor
                 archivo.seek(pos_actual)
-                archivo.write(",".join(campos))
+                campos[7] = "0"
+                archivo.write((",".join(campos)+"\n"))
+                archivo.seek(0,2)
+                campos[indice_campo] = nuevo_valor
+                campos[7] = "1"
+                archivo.write(",".join(campos)+"\n")
 
                 print("Campo modificado exitosamente.")
-
-# Resto del código...
-
 
 def ing_prod_cant():
   id = buscar_max("productos.txt")
@@ -415,8 +431,9 @@ def ing_prod_cant():
   proveedor = input("Ingrese proveedor: ")
   precio = float(input("Ingrese precio: "))
   cantidad = int(input("Ingrese cantidad: "))
+  activo = "1"
 
-  data_productos = f'{id},"{nombre}","{rubro}","{marca}",{proveedor},{precio},{cantidad}\n'
+  data_productos = f'{id},"{nombre}","{rubro}","{marca}",{proveedor},{precio},{cantidad},{activo}\n'
 
   try:
       with open("productos.txt", "a") as archivo:
@@ -432,21 +449,21 @@ def leer_productos():
         archivo = open("productos.txt", "r", encoding="UTF-8")
         for registro in archivo:
             palabra = registro.split(",")
-            productos.append(palabra)
-            if not palabra[2] in categorias:
-                categorias.append(palabra[2])
-        
-        
+            activo = palabra[7]
+            limpio = activo.strip()
+            if limpio == "1":
+                productos.append(palabra)
+                if not palabra[2] in categorias:
+                    categorias.append(palabra[2])
+            
     except FileNotFoundError as error:
         print (error)
     finally:
-        return categorias, productos
         try:
             archivo.close()
         except NameError as error:
             pass
-
-
+        return categorias, productos
 
 def ingresos():
     opciones_ingresos = [
@@ -508,7 +525,7 @@ def actualizaciones():
         nuevo_nombre = input("Ingrese nuevo nombre: ")
         nuevo_apellido = input("Ingrese nuevo apellido: ")
         nuevo_DNI = validar_dni()
-        nuevo_cuit = validar_CUIT
+        nuevo_cuit = validar_CUIT()
         editar_cliente(id_busqueda,nuevo_nombre,nuevo_apellido,nuevo_DNI,nuevo_cuit)
         main_menu()
         
@@ -518,58 +535,62 @@ def listados():
         "2- Listar productos",
     ]
 
-    for opcion in opciones_listados:
-        print(opcion)
-
     while True:
-        try:
-            choice = int(input("Seleccione una opción (1-2): "))
+        for opcion in opciones_listados:
+            print(opcion)
 
-            if 1 <= choice <= 2:
+        try:
+            choice = int(input("Seleccione una opción (1-2), o 0 para salir: "))
+
+            if choice == 0:
                 break
+            elif 1 <= choice <= 2:
+                if choice == 1:
+                    clientes = leer_clientes()
+                    print(tabulador(clientes, COLUMNAS_CLIENTES))
+                elif choice == 2:
+                    _, productos = leer_productos()
+                    print(tabulador(productos, COLUMNAS_PRODUCTOS))
             else:
                 print("Opción fuera de rango. Seleccione una opción válida (1-2).")
 
         except ValueError:
-
-            print("Entrada inválida. Ingrese un número del 1 al 2.")
-    if choice == 1:
-        clientes = leer_clientes()
-        print(tabulador(clientes, COLUMNAS_CLIENTES))
-    elif choice == 2:
-        _, productos = leer_productos()
-        print(tabulador(productos, COLUMNAS_PRODUCTOS))
+            print("Entrada inválida. Ingrese un número del 0 al 2.")
 
 def borrar():
-        opciones_borrar =[
+    opciones_borrar = [
         "1- Borrar registro clientes",
         "2- Borrar todos los productos",
         "3- Borrar todos los clientes",
     ]
 
+    while True:
         for opcion in opciones_borrar:
             print(opcion)
 
-        while True:
-            try:
-                choice = int(input("Seleccione una opción (1-3): "))
+        try:
+            choice = int(input("Seleccione una opción (1-3), o 0 para salir: "))
 
-                if 1 <= choice <= 3:
-                    break
-                else:
-                    print("Opción fuera de rango. Seleccione una opción válida (1-3).")
+            if choice == 0:
+                break
+            elif 1 <= choice <= 3:
+                if choice == 1:
+                    print(leer_clientes())
+                    borrar_registro_clientes()
+                elif choice == 2:
+                    eliminar_archivo("productos.txt")
+                elif choice == 3:
+                    eliminar_archivo("clientes.txt")
+            else:
+                print("Opción fuera de rango. Seleccione una opción válida (1-3).")
 
-            except ValueError:
+        except ValueError:
+            print("Entrada inválida. Ingrese un número del 0 al 3.")
 
-                print("Entrada inválida. Ingrese un número del 1 al 3.")
-        if choice == 1:
-            print(leer_clientes())
-            borrar_registro_clientes()
-        elif choice == 2:
-            eliminar_archivo("productos.txt")
-        elif choice ==3:
-            eliminar_archivo("clientes.txt") 
+        continuar = input("¿Realizar otra operación? (S/N): ").upper()
 
+        if continuar != "S":
+            break
 
 
 
