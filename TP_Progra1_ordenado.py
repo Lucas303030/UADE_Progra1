@@ -294,25 +294,6 @@ def validar_apellido_cliente():
             print("El apellido debe contener solo letras. Inténtelo nuevamente.")
 
 
-def validar_nombre_proveedores():
-    while True:
-        nombre = input("Ingrese nombre de proveedor: ").capitalize()
-        
-        if nombre.isalpha():
-
-            return nombre
-        else:
-            print("El nombre debe contener solo letras. Inténtelo nuevamente.")
-
-def validar_apellido_proveedores():
-    while True:
-        apellido = input("Ingrese apellido de proveedor: ").capitalize()
-        
-        if apellido.isalpha():
-
-            return apellido
-        else:
-            print("El apellido debe contener solo letras. Inténtelo nuevamente.")
 
 def ing_cliente():
     continuar = "S"
@@ -361,9 +342,6 @@ def ing_cliente():
         if continuar == "S":
             continuar = input("¿Agregar otro registro (S/N)?: ").upper()
 
-def ing_proveedor():
-  nombre_proveedor = input("Ingrese nombre de proveedor: ") #Agregar proveedor a proveedores.txt
-  pass
 
 def ing_prod_valor():
     _, productos = leer_productos()
@@ -468,8 +446,7 @@ def leer_productos():
 def ingresos():
     opciones_ingresos = [
         "1- Ingresar cliente",
-        "2- Ingresar proveedor",
-        "3- Ingresar producto",
+        "2- Ingresar producto",
     ]
 
     for opcion in opciones_ingresos:
@@ -477,21 +454,19 @@ def ingresos():
 
     while True:
         try:
-            choice = int(input("Seleccione una opción (1-3): "))
+            choice = int(input("Seleccione una opción (1-2): "))
 
-            if 1 <= choice <= 3:
+            if 1 <= choice <= 2:
                 break
             else:
-                print("Opción fuera de rango. Seleccione una opción válida (1-3).")
+                print("Opción fuera de rango. Seleccione una opción válida (1-2).")
 
         except ValueError:
 
-            print("Entrada inválida. Ingrese un número del 1 al 3.")
+            print("Entrada inválida. Ingrese un número del 1 al 2.")
     if choice == 1:
         ing_cliente()
     elif choice == 2:
-        ing_proveedor()
-    elif choice == 3:
         ing_prod_cant()
 
 def actualizaciones():
